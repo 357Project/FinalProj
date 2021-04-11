@@ -1,0 +1,577 @@
+{% extends 'index.html' %}
+
+{% block content %}
+  <div class="row no-gutters">
+    <div class="col-lg-8 pr-lg-2">
+      <div class="card mb-3">
+        <div class="card-header">
+          <div class="row d-flex justify-content-between align-items-center pl-3 pr-3">
+            <h5 class="mb-0">Vehicle Settings</h5>
+            <a class="btn btn-falcon-default btn-sm ml-2" href="#" id="saveChangesBtn" onclick="submitAttributeForm()"><span class="fas fa-check fs--2 mr-1"></span>Save changes</a>
+
+          </div>
+        </div>
+        <div class="card-body bg-light" id="attributesDiv">
+          <form method="POST" action="{% url 'save-vehicle-attribute' %}" id="vehicle-attributes-form">
+            {% csrf_token %}
+            <div class="kanban-items-container" style="max-height: none;">
+              {% for attribute in customAttributes %}
+              <div class="card p-3 kanban-item shadow-sm">
+                <div class="row" id="row-attribute-{{attribute.pk}}">
+                  <div class="col">
+                    <div class="form-group">
+                      <label for="first-name">Attribute #{{attribute.order_position}}</label>
+                      <div class="row">
+                        <div class="col-md">
+                          <input class="form-control" type="text" value="{{attribute.desc}}" name="desc-att-{{attribute.pk}}">
+                        </div>
+                        <div class="col-sm-auto d-flex justify-content-center align-items-center">
+                          <div class="custom-control custom-checkbox">
+                            {% if attribute.visible_inventory %}
+                              <input class="custom-control-input" type="checkbox" id="checkbox{{attribute.pk}}" checked="checked" name="visible-att-{{attribute.pk}}"/>
+                            {% else %}
+                              <input class="custom-control-input" type="checkbox" id="checkbox{{attribute.pk}}" name="visible-att-{{attribute.pk}}"/>
+                            {% endif %}
+                            <label class="custom-control-label" for="checkbox{{attribute.pk}}">Visible?</label>
+                          </div>
+                        </div>
+                        <div class="col-sm-auto d-flex justify-content-end">
+                          <div class="dropdown text-sans-serif d-inline-block mb-2">
+                            <button class="btn btn-falcon-default" id="attribute-{{attribute.pk}}-dropdown" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="fas fa-ellipsis-v"></span></button>
+                            <div class="dropdown-menu dropdown-menu-right py-0" aria-labelledby="attribute-{{attribute.pk}}-dropdown">
+                              <a class="dropdown-item text-danger" href="#" onclick="deleteAttribute({{attribute.pk}})">Remove</a>
+                              <a class="dropdown-item" href="#">Change Type</a>
+                              <a class="dropdown-item" href="#">Something else here</a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </form>
+          <div class="row" id="add-attribute-div">
+            <div class="col d-flex justify-content-center">
+              <div class="col-auto"><a class="btn btn-falcon-default btn-sm mt-2" href="#" data-toggle="modal" data-target="#addAttributeModal" id="add-attribute-btn"><span class="fas fa-pencil-alt fs--2 mr-1"></span>Add Attribute</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5 class="mb-0">Experiences</h5>
+        </div>
+        <div class="card-body bg-light"><a class="mb-4 d-block d-flex align-items-center" href="#experience-form" data-toggle="collapse" aria-expanded="false" aria-controls="experience-form"><span class="circle-dashed"><span class="fas fa-plus"></span></span><span class="ml-3">Add new experience</span></a>
+          <div class="collapse" id="experience-form">
+            <form>
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-lg-3 text-lg-right">
+                    <label class="mb-0" for="company">Company</label>
+                  </div>
+                  <div class="col-lg-7">
+                    <input class="form-control form-control-sm" id="company" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-lg-3 text-lg-right">
+                    <label class="mb-0" for="position">Position</label>
+                  </div>
+                  <div class="col-lg-7">
+                    <input class="form-control form-control-sm" id="position" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-lg-3 text-lg-right">
+                    <label class="mb-0" for="city">City</label>
+                  </div>
+                  <div class="col-lg-7">
+                    <input class="form-control form-control-sm" id="city" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-lg-3 text-lg-right">
+                    <label class="mb-0" for="exp-description">Description</label>
+                  </div>
+                  <div class="col-lg-7">
+                    <textarea class="form-control form-control-sm" id="exp-description" rows="3"></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-lg-7 offset-lg-3">
+                    <div class="custom-checkbox custom-control custom-control-inline">
+                      <input class="custom-control-input" id="experience-current" type="checkbox" checked="" />
+                      <label class="custom-control-label" for="experience-current">I currently work here</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-lg-3 text-lg-right">
+                    <label class="mb-0" for="exp-from">From</label>
+                  </div>
+                  <div class="col-lg-7">
+                    <input class="form-control form-control-sm datetimepicker" id="exp-from" type="text" placeholder="d-m-y" data-options='{"dateFormat":"d-m-Y"}' />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-lg-3 text-lg-right">
+                    <label class="mb-0" for="exp-to">To</label>
+                  </div>
+                  <div class="col-lg-7">
+                    <input class="form-control form-control-sm datetimepicker" id="exp-to" type="text" placeholder="d-m-y" data-options='{"dateFormat":"d-m-Y"}' />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-lg-7 offset-lg-3">
+                    <button class="btn btn-primary" type="button">Save</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+            <hr class="border-dashed border-bottom-0 my-4" />
+          </div>
+          <div class="media"><a href="#!"> <img class="img-fluid" src="../../static/img/logos/g.png" alt="" width="56" /></a>
+            <div class="media-body position-relative pl-3">
+              <h6 class="fs-0 mb-0">Big Data Engineer<small class="fas fa-check-circle text-primary ml-1" data-toggle="tooltip" data-placement="top" title="Verified" data-fa-transform="shrink-4 down-2"></small>
+              </h6>
+              <p class="mb-1"> <a href="#!">Google</a></p>
+              <p class="text-1000 mb-0">Apr 2012 - Present &bull; 6 yrs 9 mos</p>
+              <p class="text-1000 mb-0">California, USA</p>
+              <hr class="border-dashed border-bottom-0" />
+            </div>
+          </div>
+          <div class="media"><a href="#!"> <img class="img-fluid" src="../../static/img/logos/apple.png" alt="" width="56" /></a>
+            <div class="media-body position-relative pl-3">
+              <h6 class="fs-0 mb-0">Software Engineer<small class="fas fa-check-circle text-primary ml-1" data-toggle="tooltip" data-placement="top" title="Verified" data-fa-transform="shrink-4 down-2"></small>
+              </h6>
+              <p class="mb-1"> <a href="#!">Apple</a></p>
+              <p class="text-1000 mb-0">Jan 2012 - Apr 2012 &bull; 4 mos</p>
+              <p class="text-1000 mb-0">California, USA</p>
+              <hr class="border-dashed border-bottom-0" />
+            </div>
+          </div>
+          <div class="media"><a href="#!"> <img class="img-fluid" src="../../static/img/logos/nike.png" alt="" width="56" /></a>
+            <div class="media-body position-relative pl-3">
+              <h6 class="fs-0 mb-0">Mobile App Developer<small class="fas fa-check-circle text-primary ml-1" data-toggle="tooltip" data-placement="top" title="Verified" data-fa-transform="shrink-4 down-2"></small>
+              </h6>
+              <p class="mb-1"> <a href="#!">Nike</a></p>
+              <p class="text-1000 mb-0">Jan 2011 - Apr 2012 &bull; 1 yr 4 mos</p>
+              <p class="text-1000 mb-0">Beaverton, USA</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card mb-3 mb-lg-0">
+        <div class="card-header">
+          <h5 class="mb-0">Educations</h5>
+        </div>
+        <div class="card-body bg-light"><a class="mb-4 d-block d-flex align-items-center" href="#education-form" data-toggle="collapse" aria-expanded="false" aria-controls="education-form"><span class="circle-dashed"><span class="fas fa-plus"></span></span><span class="ml-3">Add new education</span></a>
+          <div class="collapse" id="education-form">
+            <form>
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-lg-3 text-lg-right">
+                    <label class="mb-0" for="school">School</label>
+                  </div>
+                  <div class="col-lg-7">
+                    <input class="form-control form-control-sm" id="school" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-lg-3 text-lg-right">
+                    <label class="mb-0" for="degree">Degree</label>
+                  </div>
+                  <div class="col-lg-7">
+                    <input class="form-control form-control-sm" id="degree" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-lg-3 text-lg-right">
+                    <label class="mb-0" for="field">Field</label>
+                  </div>
+                  <div class="col-lg-7">
+                    <input class="form-control form-control-sm" id="field" type="text" />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-lg-3 text-lg-right">
+                    <label class="mb-0" for="edu-from">From</label>
+                  </div>
+                  <div class="col-lg-7">
+                    <input class="form-control form-control-sm datetimepicker" id="edu-from" type="text" placeholder="d-m-y" data-options='{"dateFormat":"d-m-Y"}' />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-lg-3 text-lg-right">
+                    <label class="mb-0" for="edu-to">To</label>
+                  </div>
+                  <div class="col-lg-7">
+                    <input class="form-control form-control-sm datetimepicker" id="edu-to" type="text" placeholder="d-m-y" data-options='{"dateFormat":"d-m-Y"}' />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="row">
+                  <div class="col-lg-7 offset-lg-3">
+                    <button class="btn btn-primary" type="button">Save</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+            <hr class="border-dashed border-bottom-0 my-4" />
+          </div>
+          <div class="media"><a href="#!">
+              <div class="avatar avatar-3xl">
+                <div class="avatar-name rounded-circle"><span>SU</span></div>
+              </div>
+            </a>
+            <div class="media-body position-relative pl-3">
+              <h6 class="fs-0 mb-0"> <a href="#!">Stanford University<small class="fas fa-check-circle text-primary ml-1" data-toggle="tooltip" data-placement="top" title="Verified" data-fa-transform="shrink-4 down-2"></small></a></h6>
+              <p class="mb-1">Computer Science and Engineering</p>
+              <p class="text-1000 mb-0">2010 - 2014 • 4 yrs</p>
+              <p class="text-1000 mb-0">California, USA</p>
+              <hr class="border-dashed border-bottom-0" />
+            </div>
+          </div>
+          <div class="media"><a href="#!"> <img class="img-fluid" src="../../static/img/logos/staten.png" alt="" width="56" /></a>
+            <div class="media-body position-relative pl-3">
+              <h6 class="fs-0 mb-0"> <a href="#!">Staten Island Technical High School<small class="fas fa-check-circle text-primary ml-1" data-toggle="tooltip" data-placement="top" title="Verified" data-fa-transform="shrink-4 down-2"></small></a></h6>
+              <p class="mb-1">Higher Secondary School Certificate, Science</p>
+              <p class="text-1000 mb-0">2008 - 2010 &bull; 2 yrs</p>
+              <p class="text-1000 mb-0">New York, USA</p>
+              <hr class="border-dashed border-bottom-0" />
+            </div>
+          </div>
+          <div class="media"><a href="#!"> <img class="img-fluid" src="../../static/img/logos/tj-heigh-school.png" alt="" width="56" /></a>
+            <div class="media-body position-relative pl-3">
+              <h6 class="fs-0 mb-0"> <a href="#!">Thomas Jefferson High School for Science and Technology<small class="fas fa-check-circle text-primary ml-1" data-toggle="tooltip" data-placement="top" title="Verified" data-fa-transform="shrink-4 down-2"></small></a></h6>
+              <p class="mb-1">Secondary School Certificate, Science</p>
+              <p class="text-1000 mb-0">2003 - 2008 &bull; 5 yrs</p>
+              <p class="text-1000 mb-0">Alexandria, USA</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 pl-lg-2">
+        <div class="card mb-3 overflow-hidden">
+          <div class="card-header">
+            <h5 class="mb-0">Account Settings</h5>
+          </div>
+          <div class="card-body bg-light">
+            <h6 class="font-weight-bold">Who can see your profile ?<span class="fs--2 ml-1 text-primary" data-toggle="tooltip" data-placement="top" title="Only The group of selected people can see your profile"><span class="fas fa-question-circle"></span></span></h6>
+            <div class="pl-2">
+              <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="view-settings" id="everyone" />
+                <label class="custom-control-label" for="everyone">Everyone
+                </label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="view-settings" id="my-followers" checked="checked" />
+                <label class="custom-control-label" for="my-followers">My followers
+                </label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="view-settings" id="only-me" />
+                <label class="custom-control-label" for="only-me">Only me
+                </label>
+              </div>
+            </div>
+            <h6 class="mt-2 font-weight-bold">Who can tag you ?<span class="fs--2 ml-1 text-primary" data-toggle="tooltip" data-placement="top" title="Only The group of selected people can tag you"><span class="fas fa-question-circle"></span></span></h6>
+            <div class="pl-2">
+              <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="tag-settings" id="tag-everyone" />
+                <label class="custom-control-label" for="tag-everyone">Everyone
+                </label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input class="custom-control-input" type="radio" name="tag-settings" id="group-members" checked="checked" />
+                <label class="custom-control-label" for="group-members">Group Members
+                </label>
+              </div>
+            </div>
+            <hr class="border-dashed border-bottom-0">
+            <div class="custom-control custom-checkbox">
+              <input class="custom-control-input" type="checkbox" id="checkbox1" checked="checked" />
+              <label class="custom-control-label" for="checkbox1">Allow users to show your followers
+              </label>
+            </div>
+            <div class="custom-control custom-checkbox">
+              <input class="custom-control-input" type="checkbox" id="checkbox2" checked="checked" />
+              <label class="custom-control-label" for="checkbox2">Allow users to show your email
+              </label>
+            </div>
+            <div class="custom-control custom-checkbox">
+              <input class="custom-control-input" type="checkbox" id="checkbox3" />
+              <label class="custom-control-label" for="checkbox3">Allow users to show your experiences
+              </label>
+            </div>
+            <hr class="border-dashed border-bottom-0">
+            <div class="custom-control custom-switch">
+              <input class="custom-control-input" type="checkbox" id="switch1" checked="checked" />
+              <label class="custom-control-label" for="switch1">Make your phone number visible
+              </label>
+            </div>
+            <div class="custom-control custom-switch">
+              <input class="custom-control-input" type="checkbox" id="switch2" />
+              <label class="custom-control-label" for="switch2">Allow user to follow you
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5 class="mb-0">Billing Setting</h5>
+          </div>
+          <div class="card-body bg-light">
+            <h5>Plan</h5>
+            <p class="fs-0"><strong>Developer</strong>- Unlimited private repositories</p><a class="btn btn-falcon-default btn-sm" href="#!">Update Plan</a>
+          </div>
+          <div class="card-body bg-light border-top">
+            <h5>Payment</h5>
+            <p class="fs-0">You have not added any payment.</p><a class="btn btn-falcon-default btn-sm" href="#!">Add Payment </a>
+          </div>
+        </div>
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5 class="mb-0">Change Password</h5>
+          </div>
+          <div class="card-body bg-light">
+            <form>
+              <div class="form-group">
+                <label for="old-password">Old Password</label>
+                <input class="form-control" id="old-password" type="password">
+              </div>
+              <div class="form-group">
+                <label for="new-password">New Password</label>
+                <input class="form-control" id="new-password" type="password">
+              </div>
+              <div class="form-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input class="form-control" id="confirm-password" type="password">
+              </div>
+              <button class="btn btn-primary btn-block" type="submit">Update Password</button>
+            </form>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Danger Zone</h5>
+          </div>
+          <div class="card-body bg-light">
+            <h5 class="fs-0">Transfer Ownership</h5>
+            <p class="fs--1">Transfer this account to another user or to an organization where you have the ability to create repositories.</p><a class="btn btn-falcon-warning d-block" href="#!">Transfer</a>
+            <hr class="border border-dashed my-4" />
+            <h5 class="fs-0">Delete this account</h5>
+            <p class="fs--1">Once you delete a account, there is no going back. Please be certain.</p><a class="btn btn-falcon-danger d-block" href="#!">Deactivate Account</a>
+          </div>
+        </div>
+    </div>
+  </div>
+  <footer>
+    <div class="row no-gutters justify-content-between fs--1 mt-4 mb-3">
+      <div class="col-12 col-sm-auto text-center">
+        <p class="mb-0 text-600">Thank you for creating with Falcon <span class="d-none d-sm-inline-block">| </span><br class="d-sm-none" /> 2021 &copy; <a href="https://themewagon.com">Themewagon</a></p>
+      </div>
+      <div class="col-12 col-sm-auto text-center">
+        <p class="mb-0 text-600">v2.8.1</p>
+      </div>
+    </div>
+  </footer>
+{% endblock %}
+
+{% block modals %}
+<!-- ADD VEHICLE ATTRIBUTE MODAL -->
+
+<div class="modal fade" id="addAttributeModal" tabindex="-1" role="dialog" aria-labelledby="addAttributeModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addAttributeModalLabel">Add Vehicle Attribute</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="first-name">Attribute Description</label>
+            <div class="row">
+              <div class="col-md">
+                <div class="form-group">
+                  <input class="form-control mb-2" id="new-vehicle-attribute" type="text" placeholder="Enter the description here">
+                </div>
+                <div class="form-group">
+                  <div class="custom-control custom-checkbox">
+                    <input class="custom-control-input" type="checkbox" id="new-attribute-visible"/>
+                    <label class="custom-control-label" for="new-attribute-visible">Make this attribute visible in the inventory table?</label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="attributeTypeDropdown">Select type of the attribute</label>
+                  <select class="form-control" id="attributeTypeDropdown" name="attributeType" onchange="checkIfDropdownMenu()">
+                    <option value="none" style="background-color: #e3e3e3;">Select type</option>
+                    <option value="str">Plain Text</option>
+                    <option value="int">Number</option>
+                    <option value="cur">Currency</option>
+                    <option value="date">Date & Time</option>
+                    <option value="drop">Dropdown Menu</option>
+                  </select>
+                </div>
+                <div id="dropdownOptions" style="display: none;">
+                  <div class="form-group">
+                    <div class="row d-flex justify-content-between">
+                      <div class="col-sm">
+                        <input class="form-control" id="option-1" type="text" placeholder="Item description">
+                      </div>
+                      <!--
+                      <div class="col-sm-auto">
+                        <button class="btn btn-falcon-sm"><span class="fas fa-minus"></span></button>
+                      </div>
+                      -->
+                    </div>
+                  </div>
+                  <div class="row d-flex justify-content-center" id="addOptionDiv">
+                    <button class="btn btn-falcon-sm" data-backdrop="static" data-keyboard="false" onclick="addDropdownOption()" id="addOptionBtn"><span class="fas fa-plus"></span></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="addAttribute()" data-dismiss="modal">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+  var dropDownOption = 2;
+  function checkIfDropdownMenu() {
+    var hiddenDiv = document.getElementById("dropdownOptions");
+    var attributeType = document.getElementById("attributeTypeDropdown");
+    if (attributeType.value == "drop") {
+      hiddenDiv.style.display = "block";
+    }
+    else {
+      hiddenDiv.style.display = "none";
+    }
+  }
+
+  // <div class="form-group">
+  //   <div class="row d-flex justify-content-between">
+  //     <div class="col-sm">
+  //       <input class="form-control" id="option-1" type="text" placeholder="Item description">
+  //     </div>
+  //     <!--
+  //     <div class="col-sm-auto">
+  //       <button class="btn btn-falcon-sm"><span class="fas fa-minus"></span></button>
+  //     </div>
+  //     -->
+  //   </div>
+  // </div>
+
+  $(document).on('click', '#addOptionBtn', function (event)
+  {
+      event.preventDefault();
+  });
+
+  function addDropdownOption() {
+    var dropdownOptionDiv = document.getElementById("dropdownOptions")
+    var newFormGroup = document.createElement("DIV")
+    newFormGroup.setAttribute("class", "form-group")
+    newFormGroup.setAttribute("id", "option-group-" + dropDownOption)
+    newFormGroup.innerHTML = "<div class='row d-flex justify-content-between'><div class='col-sm'><input class='form-control' id='option-" + dropDownOption + "' name='option-" + dropDownOption + "' type='text' placeholder='Item description'></div><div class='col-sm-auto'><button class='btn btn-falcon-sm' onclick='removeDropdownOption(" + dropDownOption + ")'><span class='fas fa-minus'></span></button></div></div>"
+    dropdownOptionDiv.insertBefore(newFormGroup, document.getElementById("addOptionDiv"))
+    dropDownOption++;
+  }
+
+  function removeDropdownOption(option) {
+    var fieldGroup = document.getElementById("option-group-" + option);
+    fieldGroup.remove();
+  }
+
+  function addAttribute() {
+    var newVehicleAttribute = document.getElementById("new-vehicle-attribute");
+    var newVehicleAttributeVisible = document.getElementById("new-attribute-visible");
+    var newVehicleAttributeType = document.getElementById("attributeTypeDropdown");
+
+    var optionList = [];
+    if (newVehicleAttributeType.value == "drop") {
+      for (var i = 1; i < dropDownOption; i++) {
+        var option = document.getElementById("option-" + i);
+        if (option != null) {
+          optionList.push(option.value);
+        }
+      }
+    }
+    $.ajax({
+      url: "{% url 'add-vehicle-attribute' %}",
+      data: {
+        'description': newVehicleAttribute.value,
+        'visible': newVehicleAttributeVisible.checked,
+        'attributeType': newVehicleAttributeType.value,
+        'optionList': JSON.stringify(optionList),
+      },
+      dataType: 'json',
+      success: function(data) {
+        location.reload();
+      },
+      error: function(data) {
+          alert("Uh-oh");
+      }
+    });
+  }
+
+  function deleteAttribute(attribute_pk) {
+    $.ajax({
+      url: "{% url 'delete-vehicle-attribute' %}",
+      data: {
+        'attribute_pk': attribute_pk,
+      },
+      dataType: 'json',
+      success: function(data) {
+        location.reload();
+      },
+      error: function(data) {
+          alert("Uh-oh");
+      }
+    });
+  }
+
+  function submitAttributeForm() {
+    var form = document.getElementById("vehicle-attributes-form");
+    form.submit();
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="card mb-3">
+    <div class="card-header">
+      <div class="row align-items-center justify-content-between">
+        <div class="col-6 col-sm-auto d-flex align-items-center pr-0">
+          <h5 class="fs-0 mb-0 text-nowrap py-2 py-xl-0">Vehicle Inventory</h5>
+        </div>
+        <div class="col-6 col-sm-auto ml-auto text-right pl-0">
+          <div class="d-none" id="purchases-actions">
+            <div class="input-group input-group-sm">
+              <select class="custom-select cus" aria-label="Bulk actions">
+                <option selected="">Bulk actions</option>
+                <option value="Refund">Refund</option>
+                <option value="Delete">Delete</option>
+                <option value="Archive">Archive</option>
+              </select>
+              <button class="btn btn-falcon-default btn-sm ml-2" type="button">Apply</button>
+            </div>
+          </div>
+          <div id="dashboard-actions">
+            <button class="btn btn-falcon-default btn-sm" type="button" onclick="addNewVehicle()"><span class="fas fa-plus" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ml-1">New</span></button>
+            <button class="btn btn-falcon-default btn-sm mx-2" type="button"><span class="fas fa-filter" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ml-1">Filter</span></button>
+            <button class="btn btn-falcon-default btn-sm" type="button"><span class="fas fa-external-link-alt" data-fa-transform="shrink-3 down-2"></span><span class="d-none d-sm-inline-block ml-1">Export</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body px-0 pt-0">
+      <div class="dashboard-data-table">
+        <table class="table table-sm table-dashboard fs--1 data-table border-bottom" data-options='{"responsive":false,"pagingType":"simple","lengthChange":false,"searching":false,"pageLength":8,"columnDefs":[{"targets":[0,6],"orderable":false}],"language":{"info":"_START_ to _END_ Items of _TOTAL_ — <a href=\"#!\" class=\"font-weight-semi-bold\"> view all <span class=\"fas fa-angle-right\" data-fa-transform=\"down-1\"></span> </a>"},"buttons":["copy","excel"]}'>
+          <thead class="bg-200 text-900">
+            <tr>
+              <th class="no-sort pr-1 align-middle data-table-row-bulk-select">
+                <div class="custom-control custom-checkbox">
+                  <input class="custom-control-input checkbox-bulk-select" id="checkbox-bulk-purchases-select" type="checkbox" data-checkbox-body="#purchases" data-checkbox-actions="#purchases-actions" data-checkbox-replaced-element="#dashboard-actions" />
+                  <label class="custom-control-label" for="checkbox-bulk-purchases-select"></label>
+                </div>
+              </th>
+              {% for attribute in attributes %}
+                <th class="sort pr-1 pl-1 align-middle">{{attribute.desc}}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody id="purchases">
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="row no-gutters justify-content-between fs--1 mt-4 mb-3">
+      <div class="col-12 col-sm-auto text-center">
+        <p class="mb-0 text-600">Thank you for creating with Falcon <span class="d-none d-sm-inline-block">| </span><br class="d-sm-none" /> 2021 &copy; <a href="https://themewagon.com">Themewagon</a></p>
+      </div>
+      <div class="col-12 col-sm-auto text-center">
+        <p class="mb-0 text-600">v2.8.1</p>
+      </div>
+    </div>
+  </footer>
+{% endblock %}
+
+{% block modals %}
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+    function addNewVehicle() {
+        window.location.href = "{% url 'add-vehicle' %}";
+    }
+</script>
+{% endblock %}
