@@ -1,7 +1,9 @@
 {% extends 'index.html' %}
 {% load inventory_tags %}
 {% block content %}
-<div class="card mb-3">
+<form method="POST" action="{% url 'add-vehicle' %}">
+  {% csrf_token %}
+  <div class="card mb-3">
     <div class="card-header">
       <div class="row">
         <div class="col">
@@ -40,37 +42,15 @@
               <p class="font-weight-semi-bold mb-1">Serial #</p>
             </div>
             <div class="col-sm-auto">
-                <input class="form-control" type="text">
+                <input class="form-control" type="text" name="serial-number">
             </div>
           </div>
           <div class="row d-flex align-items-center mb-1">
             <div class="col-5 col-sm-4">
-              <p class="font-weight-semi-bold mb-1">Created</p>
+              <p class="font-weight-semi-bold mb-1">Arrived on</p>
             </div>
             <div class="col-sm-auto">
-                <input class="form-control" type="text">
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-5 col-sm-4">
-              <p class="font-weight-semi-bold mb-1">Email</p>
-            </div>
-            <div class="col"><a href="mailto:tony@gmail.com">tony@gmail.com</a></div>
-          </div>
-          <div class="row">
-            <div class="col-5 col-sm-4">
-              <p class="font-weight-semi-bold mb-1">Description</p>
-            </div>
-            <div class="col">
-              <p class="font-italic text-400 mb-1">No Description</p>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-5 col-sm-4">
-              <p class="font-weight-semi-bold mb-0">VAT number</p>
-            </div>
-            <div class="col">
-              <p class="font-italic text-400 mb-0">No VAT number</p>
+              <input class="form-control datetimepicker" id="datetimepicker" type="text" placeholder="dd/mm/yy" data-options='{"enableTime":false,"dateFormat":"d/m/y"}' name="arrived-on">
             </div>
           </div>
         </div>
@@ -106,7 +86,7 @@
         </div>
       </div>
     </div>
-</div>
+  </div>
   <div class="card mb-3">
     <div class="card-header">
       <div class="row align-items-center">
@@ -125,7 +105,7 @@
                 <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
               </div>
               <div class="col-md-auto">
-                <select class="form-control" style="width: 100%;">
+                <select class="form-control" style="width: 100%;" name="custom-attribute-{{attribute.pk}}">
                   <option value="None" class="bg-light">Select an option</option>
                   {% for choice in attribute|get_choices %}
                   <option value="{{choice.option}}">{{choice.option}}</option>
@@ -139,7 +119,7 @@
                 <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
               </div>
               <div class="col-md-auto">
-                <input class="form-control" type="number">
+                <input class="form-control" type="number" name="custom-attribute-{{attribute.pk}}">
               </div> 
             </div>
             {% elif attribute|is_date_time:attribute.pk %}
@@ -148,7 +128,7 @@
                 <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
               </div>
               <div class="col-md-auto">
-                <input class="form-control datetimepicker" id="datetimepicker" type="text" placeholder="dd/mm/yy h:m" data-options='{"enableTime":true,"dateFormat":"d/m/y H:i"}'>
+                <input class="form-control datetimepicker" id="datetimepicker" type="text" placeholder="dd/mm/yy h:m" data-options='{"enableTime":true,"dateFormat":"d/m/y H:i"}' name="custom-attribute-{{attribute.pk}}">
               </div> 
             </div>
             {% else %}
@@ -157,7 +137,7 @@
                 <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
               </div>
               <div class="col-md-auto">
-                  <input class="form-control" type="text">
+                  <input class="form-control" type="text" name="custom-attribute-{{attribute.pk}}">
               </div>
             </div>
             {% endif %}
@@ -171,7 +151,7 @@
                   <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
                 </div>
                 <div class="col-md-auto">
-                  <select class="form-control" style="width: 100%;">
+                  <select class="form-control" style="width: 100%;" name="custom-attribute-{{attribute.pk}}">
                     <option value="None" class="bg-light">Select an option</option>
                     {% for choice in attribute|get_choices %}
                     <option value="{{choice.option}}">{{choice.option}}</option>
@@ -185,7 +165,7 @@
                 <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
               </div>
               <div class="col-md-auto">
-                <input class="form-control" type="number">
+                <input class="form-control" type="number" name="custom-attribute-{{attribute.pk}}">
               </div> 
             </div>
             {% elif attribute|is_date_time:attribute.pk %}
@@ -194,7 +174,7 @@
                 <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
               </div>
               <div class="col-md-auto">
-                <input class="form-control datetimepicker" id="datetimepicker" type="text" placeholder="dd/mm/yy h:m" data-options='{"enableTime":true,"dateFormat":"d/m/y H:i"}'>
+                <input class="form-control datetimepicker" id="datetimepicker" type="text" placeholder="dd/mm/yy h:m" data-options='{"enableTime":true,"dateFormat":"d/m/y H:i"}' name="custom-attribute-{{attribute.pk}}">
               </div> 
             </div>
             {% else %}
@@ -203,7 +183,7 @@
                   <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
                 </div>
                 <div class="col-md-auto">
-                    <input class="form-control" type="text">
+                    <input class="form-control" type="text" name="custom-attribute-{{attribute.pk}}">
                 </div>
               </div>
             {% endif %}
@@ -211,6 +191,7 @@
         </div>
       </div>
     </div>
-    <div class="card-footer border-top text-right"><a class="btn btn-falcon-default btn-sm ml-2" href="#!"><span class="fas fa-check fs--2 mr-1"></span>Save changes</a></div>
+    <div class="card-footer border-top text-right"><button class="btn btn-falcon-default btn-sm ml-2" type="submit"><span class="fas fa-check fs--2 mr-1"></span>Save changes</button></div>
   </div>
+</form>
 {% endblock %}
