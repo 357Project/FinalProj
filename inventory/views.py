@@ -13,10 +13,14 @@ def view_inventory(request):
     dealership = DealershipUser.objects.filter(user=request.user).first().dealership
     # get custom vehicle attributes
     attributes = CustomVehicleAttribute.objects.filter(dealership=dealership.pk, visible_inventory=True).order_by('order_position').all()
+
+    # query vehicles for dealership
+    vehicle_list = Vehicle.objects.filter(dealership=dealership.pk).all()
     context = {
         'inventoryShow': ' show',
         'viewInventoryActive': ' active',
-        'attributes': attributes
+        'attributes': attributes,
+        'vehicleList': vehicle_list,
     }
     return render(request, 'pages/inventory.html', context)
 
@@ -61,7 +65,7 @@ def add_vehicle(request):
     for attribute in attributes:
         input_field = request.POST.get(f'custom-attribute-{attribute.pk}')
         # depending on the attribute type, make some modifications and add them to the right table
-        if attribute.attribute_type == 'str':
+        if attribute.attribute_type == 'str' or attribute.attribute_type == 'drop':
             # create new vehicle attribute
             new_attribute = VehicleAttribute(vehicle=new_vehicle)
             new_attribute.save()
