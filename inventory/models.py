@@ -5,8 +5,8 @@ from users.models import Dealership
 class Vehicle(models.Model):
     dealership = models.ForeignKey(Dealership, on_delete=models.PROTECT)
     serial = models.CharField(max_length=25, unique=True)
-    arrived_on = models.DateField(null=True)
-    date_added = models.DateTimeField(auto_now_add=True)
+    arrived_on = models.DateField(null=False, blank=False)
+    date_added = models.DateTimeField(auto_now_add=True, null=False)
     last_modified = models.DateTimeField(null=True)
 
 class CustomVehicleAttribute(models.Model):

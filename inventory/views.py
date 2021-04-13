@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Vehicle, VehicleAttribute, CustomVehicleAttribute, CustomVehicleAttributeOptions, StringVehicleAttribute, IntegerVehicleAttribute, CurrencyVehicleAttribute, DateTimeVehicleAttribute
+from .models import Vehicle, VehicleAttribute, CustomVehicleAttribute, CustomVehicleAttributeOptions, StringVehicleAttribute, IntegerVehicleAttribute, CurrencyVehicleAttribute, DateTimeVehicleAttribute, VehicleType
 from users.models import Dealership, DealershipUser
 from django.contrib.auth.decorators import login_required
 
@@ -44,7 +44,7 @@ def add_vehicle_view(request):
 def add_vehicle(request):
     serial_number = request.POST.get('serial-number')
     arrived_on = request.POST.get('arrived-on')
-
+    print(f"========DEBUG: {arrived_on}==========")
     # get dealership associated to user
     dealership = DealershipUser.objects.filter(user=request.user).first().dealership
     # get custom vehicle attributes
@@ -65,6 +65,9 @@ def add_vehicle(request):
             # create new vehicle attribute
             new_attribute = VehicleAttribute(vehicle=new_vehicle)
             new_attribute.save()
+            # link this attribute to the custom attribute
+            new_vehicle_type = VehicleType(custom_attribute=attribute, vehicle_attribute=new_attribute)
+            new_vehicle_type.save()
             # add to StringVehicleAttribute
             new_string_attribute = StringVehicleAttribute(vehicle=new_attribute, string_value=input_field)
             new_string_attribute.save()
@@ -72,6 +75,9 @@ def add_vehicle(request):
             # create new vehicle attribute
             new_attribute = VehicleAttribute(vehicle=new_vehicle)
             new_attribute.save()
+            # link this attribute to the custom attribute
+            new_vehicle_type = VehicleType(custom_attribute=attribute, vehicle_attribute=new_attribute)
+            new_vehicle_type.save()
             # add to IntegerVehicleAttribute
             new_integer_attribute = IntegerVehicleAttribute(vehicle=new_attribute, integer_value=int(input_field))
             new_integer_attribute.save()
@@ -79,6 +85,9 @@ def add_vehicle(request):
             # create new vehicle attribute
             new_attribute = VehicleAttribute(vehicle=new_vehicle)
             new_attribute.save()
+            # link this attribute to the custom attribute
+            new_vehicle_type = VehicleType(custom_attribute=attribute, vehicle_attribute=new_attribute)
+            new_vehicle_type.save()
             # add to CurrencyVehicleAttribute
             # format input into decimal rounded to 2 decimal places
             decimal_value = Decimal(float(input_field))
@@ -89,6 +98,9 @@ def add_vehicle(request):
             # create new vehicle attribute
             new_attribute = VehicleAttribute(vehicle=new_vehicle)
             new_attribute.save()
+            # link this attribute to the custom attribute
+            new_vehicle_type = VehicleType(custom_attribute=attribute, vehicle_attribute=new_attribute)
+            new_vehicle_type.save()
             # add to DateTimeVehicleAttribute
             new_date_time_attribute = DateTimeVehicleAttribute(vehicle=new_attribute, date_time_value=input_field)
             new_date_time_attribute.save()

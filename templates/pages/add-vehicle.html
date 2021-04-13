@@ -50,7 +50,7 @@
               <p class="font-weight-semi-bold mb-1">Arrived on</p>
             </div>
             <div class="col-sm-auto">
-              <input class="form-control datetimepicker" id="datetimepicker" type="text" placeholder="dd/mm/yy" data-options='{"enableTime":false,"dateFormat":"d/m/y"}' name="arrived-on">
+              <input class="form-control datetimepicker" id="datetimepicker" type="text" placeholder="yyyy-mm-dd" data-options='{"enableTime":false,"dateFormat":"Y-m-d"}' name="arrived-on">
             </div>
           </div>
         </div>
@@ -128,7 +128,7 @@
                 <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
               </div>
               <div class="col-md-auto">
-                <input class="form-control datetimepicker" id="datetimepicker" type="text" placeholder="dd/mm/yy h:m" data-options='{"enableTime":true,"dateFormat":"d/m/y H:i"}' name="custom-attribute-{{attribute.pk}}">
+                <input class="form-control datetimepicker" id="datetimepicker" type="text" placeholder="yyyy-mm-dd h:m" data-options='{"enableTime":true,"dateFormat":"Y-m-d H:i"}' name="custom-attribute-{{attribute.pk}}">
               </div> 
             </div>
             {% else %}
@@ -174,7 +174,7 @@
                 <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
               </div>
               <div class="col-md-auto">
-                <input class="form-control datetimepicker" id="datetimepicker" type="text" placeholder="dd/mm/yy h:m" data-options='{"enableTime":true,"dateFormat":"d/m/y H:i"}' name="custom-attribute-{{attribute.pk}}">
+                <input class="form-control datetimepicker" id="datetimepicker" type="text" placeholder="yyyy-mm-dd h:m" data-options='{"enableTime":true,"dateFormat":"Y-m-d H:i"}' name="custom-attribute-{{attribute.pk}}">
               </div> 
             </div>
             {% else %}
