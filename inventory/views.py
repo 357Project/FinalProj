@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .models import Vehicle, VehicleAttribute, CustomVehicleAttribute, CustomVehicleAttributeOptions, StringVehicleAttribute, IntegerVehicleAttribute, CurrencyVehicleAttribute, DateTimeVehicleAttribute, VehicleType
 from users.models import Dealership, DealershipUser
 from django.contrib.auth.decorators import login_required
+from django.http.response import JsonResponse
 
 from datetime import date
 from decimal import Decimal
@@ -13,7 +14,7 @@ def view_inventory(request):
     dealership = DealershipUser.objects.filter(user=request.user).first().dealership
     # get custom vehicle attributes
     attributes = CustomVehicleAttribute.objects.filter(dealership=dealership.pk, visible_inventory=True).order_by('order_position').all()
-
+    all_attributes = CustomVehicleAttribute.objects.filter(dealership=dealership.pk).order_by('order_position').all()
     # query vehicles for dealership
     vehicle_list = Vehicle.objects.filter(dealership=dealership.pk).all()
     context = {
@@ -21,6 +22,7 @@ def view_inventory(request):
         'viewInventoryActive': ' active',
         'attributes': attributes,
         'vehicleList': vehicle_list,
+        'allAttributes': all_attributes
     }
     return render(request, 'pages/inventory.html', context)
 
@@ -73,7 +75,7 @@ def add_vehicle(request):
             new_vehicle_type = VehicleType(custom_attribute=attribute, vehicle_attribute=new_attribute)
             new_vehicle_type.save()
             # add to StringVehicleAttribute
-            new_string_attribute = StringVehicleAttribute(vehicle=new_attribute, string_value=input_field)
+            new_string_attribute = StringVehicleAttribute(vehicle_attribute=new_attribute, string_value=input_field)
             new_string_attribute.save()
         elif attribute.attribute_type == 'int':
             # create new vehicle attribute
@@ -83,7 +85,7 @@ def add_vehicle(request):
             new_vehicle_type = VehicleType(custom_attribute=attribute, vehicle_attribute=new_attribute)
             new_vehicle_type.save()
             # add to IntegerVehicleAttribute
-            new_integer_attribute = IntegerVehicleAttribute(vehicle=new_attribute, integer_value=int(input_field))
+            new_integer_attribute = IntegerVehicleAttribute(vehicle_attribute=new_attribute, integer_value=int(input_field))
             new_integer_attribute.save()
         elif attribute.attribute_type == 'cur':
             # create new vehicle attribute
@@ -96,7 +98,7 @@ def add_vehicle(request):
             # format input into decimal rounded to 2 decimal places
             decimal_value = Decimal(float(input_field))
             rounded_decimal = round(decimal_value, 2)
-            new_currency_attribute = CurrencyVehicleAttribute(vehicle=new_attribute, decimal_value=rounded_decimal)
+            new_currency_attribute = CurrencyVehicleAttribute(vehicle_attribute=new_attribute, decimal_value=rounded_decimal)
             new_currency_attribute.save()
         elif attribute.attribute_type == 'date':
             # create new vehicle attribute
@@ -106,9 +108,42 @@ def add_vehicle(request):
             new_vehicle_type = VehicleType(custom_attribute=attribute, vehicle_attribute=new_attribute)
             new_vehicle_type.save()
             # add to DateTimeVehicleAttribute
-            new_date_time_attribute = DateTimeVehicleAttribute(vehicle=new_attribute, date_time_value=input_field)
+            new_date_time_attribute = DateTimeVehicleAttribute(vehicle_attribute=new_attribute, date_time_value=input_field)
             new_date_time_attribute.save()
         else:
             print('Something went wrong, attribute has a wrong attribute type.')
         
     return redirect('view-inventory')
+
+@login_required(login_url='login')
+def get_attribute_values(request):
+    vehicle_pk = request.GET.get('vehicle_pk')
+
+    values = {}
+    attributes = VehicleAttribute.objects.filter(vehicle=vehicle_pk).all()
+    for attribute in attributes:
+        vehicle_type = VehicleType.objects.select_related().get(vehicle_attribute=attribute)
+        if vehicle_type.custom_attribute.attribute_type == "str" or vehicle_type.custom_attribute.attribute_type == "drop":
+            values[vehicle_type.custom_attribute.pk] = StringVehicleAttribute.objects.get(vehicle_attribute=attribute).string_value
+        elif vehicle_type.custom_attribute.attribute_type == "int":
+            values[vehicle_type.custom_attribute.pk] = IntegerVehicleAttribute.objects.get(vehicle_attribute=attribute).string_value
+        elif vehicle_type.custom_attribute.attribute_type == "cur":
+            values[vehicle_type.custom_attribute.pk] = CurrencyVehicleAttribute.objects.get(vehicle_attribute=attribute).string_value
+        elif vehicle_type.custom_attribute.attribute_type == "date":
+            values[vehicle_type.custom_attribute.pk] = DateTimeVehicleAttribute.objects.get(vehicle_attribute=attribute).string_value
+    
+    return JsonResponse(values)
+
+@login_required(login_url='login')
+def get_vehicle_properties(request):
+    vehicle_pk = request.GET.get('vehicle_pk')
+
+    vehicle = Vehicle.objects.get(pk=vehicle_pk)
+    date_added = str(vehicle.date_added).split("T")[0].split(" ")[0]
+    values = {
+        'serial': vehicle.serial,
+        'date_added': date_added,
+        'arrived_on': vehicle.arrived_on,
+    }
+    return JsonResponse(values)
+

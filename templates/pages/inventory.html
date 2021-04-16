@@ -50,12 +50,12 @@
             <tr>
               <td class="align-middle">
                 <div class="custom-control custom-checkbox">
-                  <input class="custom-control-input checkbox-bulk-select-target" type="checkbox" />
-                  <label class="custom-control-label"></label>
+                  <input class="custom-control-input checkbox-bulk-select-target" type="checkbox" id="checkbox-vehicle-{{vehicle.pk}}"/>
+                  <label class="custom-control-label" for="checkbox-vehicle-{{vehicle.pk}}"></label>
                 </div>
               </td>
-              <td><a href="#">{{vehicle.serial}}</a></td>
-              <td>{{vehicle.date_added}}</td>
+              <td><a href="" data-toggle="modal" data-target="#viewVehicleModal" onclick="loadModalData('{{vehicle.pk}}')">{{vehicle.serial}}</a></td>
+              <td>{{vehicle.arrived_on}}</td>
               {% for attribute in vehicle|attribute_list:vehicle.pk %}
                 {% if attribute|is_visible:attribute.pk %}
                   <td>{{attribute|return_attribute_value:attribute.pk}}</td>
@@ -81,13 +81,131 @@
 {% endblock %}
 
 {% block modals %}
-
+<div class="modal fade" id="viewVehicleModal" tabindex="-1" role="dialog" aria-labelledby="viewVehicleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewVehicleModalLabel">Modal Title</h5><button class="close" type="button" data-dismiss="modal" aria-label="Close"><span class="font-weight-light" aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="card mb-3">
+          <div class="card-header">
+            <div class="row align-items-center">
+              <div class="col">
+                <h5 class="mb-0">Default Details</h5>
+              </div>
+            </div>
+          </div>
+          <div class="card-body bg-light border-top">
+            <div class="row">
+              <div class="col-sm-6">
+                <p class="font-weight-semi-bold mb-1">Serial #</p>
+              </div>
+              <div class="col-sm-auto">
+                <p class="mb-1" id="serial"></p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <p class="font-weight-semi-bold mb-1">Arrived on</p>
+              </div>
+              <div class="col-sm-auto">
+                <p class="mb-1" id="arrived-on"></p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <p class="font-weight-semi-bold mb-1">Created on</p>
+              </div>
+              <div class="col-sm-auto">
+                <p class="mb-1" id="created-on"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card mb-3">
+          <div class="card-header">
+            <div class="row align-items-center">
+              <div class="col">
+                <h5 class="mb-0">Custom Details</h5>
+              </div>
+            </div>
+          </div>
+          <div class="card-body bg-light border-top">
+            {% for attribute in allAttributes %}
+            <div class="row">
+              <div class="col-sm-6">
+                <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
+              </div>
+              <div class="col-sm-auto">
+                <p class="mb-1" id="attribute-{{attribute.pk}}"></p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="card mb-3">
+          <div class="card-header">
+            <div class="row align-items-center">
+              <div class="col">
+                <h5 class="mb-0">Vehicle Location</h5>
+              </div>
+            </div>
+          </div>
+          <div class="card-body bg-light border-top">
+            <div class="row">
+              
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-falcon-default btn-sm ml-2"><span class="fas fa-location-arrow fs--2 mr-1"></span>Update Location</button><button class="btn btn-primary btn-sm" type="button">Modify Entries</button></div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block javascript %}
 <script>
     function addNewVehicle() {
         window.location.href = "{% url 'add-vehicle-view' %}";
+    }
+
+    function loadModalData(vehicle_pk) {
+      $.ajax({
+        url: "{% url 'get-vehicle-properties' %}",
+        data: {
+          'vehicle_pk': vehicle_pk,
+        },
+        dataType: 'json',
+        success: function(data) {
+          var serialNumber = document.getElementById("serial");
+          serialNumber.innerHTML = data['serial'];
+          var arrivedOn = document.getElementById("arrived-on");
+          arrivedOn.innerHTML = data['arrived_on']
+          var createdOn = document.getElementById("created-on");
+          createdOn.innerHTML = data['date_added']
+        },
+        error: function(data) {
+            alert("Uh-oh");
+        }
+      });
+      $.ajax({
+        url: "{% url 'get-attribute-values' %}",
+        data: {
+          'vehicle_pk': vehicle_pk,
+        },
+        dataType: 'json',
+        success: function(data) {
+          for (attribute in data) {
+            var modalElement = document.getElementById("attribute-" + attribute);
+            modalElement.innerHTML = data[attribute];
+          }
+        },
+        error: function(data) {
+            alert("Uh-oh");
+        }
+      });
     }
 </script>
 {% endblock %}

@@ -35,21 +35,22 @@ def return_attribute_value(attribute, attribute_pk):
     attribute_type = VehicleType.objects.select_related().filter(vehicle_attribute=attribute_pk).first()
     if attribute_type.custom_attribute.attribute_type == "str" or attribute_type.custom_attribute.attribute_type == "drop":
         # query StringVehicleAttribute
-        return StringVehicleAttribute.objects.filter(vehicle=attribute_pk).first().string_value
+        return StringVehicleAttribute.objects.filter(vehicle_attribute=attribute_pk).first().string_value
     elif attribute_type.custom_attribute.attribute_type == "int":
         # query IntegerVehicleAttribute
-        return IntegerVehicleAttribute.objects.filter(vehicle=attribute_pk).first().integer_value
+        return IntegerVehicleAttribute.objects.filter(vehicle_attribute=attribute_pk).first().integer_value
     elif attribute_type.custom_attribute.attribute_type == "cur":
         # query CurrencyVehicleAttribute
-        return CurrencyVehicleAttribute.objects.filter(vehicle=attribute_pk).first().decimal_value
+        return CurrencyVehicleAttribute.objects.filter(vehicle_attribute=attribute_pk).first().decimal_value
     elif attribute_type.custom_attribute.attribute_type == "date":
         # query DateTimeVehicleAttribute
-        return DateTimeVehicleAttribute.objects.filter(vehicle=attribute_pk).first().date_time_value
+        return DateTimeVehicleAttribute.objects.filter(vehicle_attribute=attribute_pk).first().date_time_value
     else:
         return null
 
 def attribute_list(vehicle, vehicle_pk):
     return VehicleAttribute.objects.filter(vehicle=vehicle_pk).all()
+
 
 register.filter('get_choices', get_attribute_choices)
 register.filter('is_dropdown', is_dropdown)
