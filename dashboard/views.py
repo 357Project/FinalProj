@@ -2,8 +2,9 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
-from inventory.models import Vehicle, VehicleAttribute, CustomVehicleAttribute, CustomVehicleAttributeOptions
+from inventory.models import Vehicle, VehicleAttribute, CustomVehicleAttribute, CustomVehicleAttributeOptions, Location
 from users.models import Dealership, DealershipUser
+from .forms import LocationForm
 
 # Create your views here.
 @login_required(login_url='login')
@@ -22,9 +23,11 @@ def settings_view(request):
     dealershipUser = DealershipUser.objects.filter(user=request.user).first()
     if dealershipUser is not None:
         customAttributes = CustomVehicleAttribute.objects.filter(dealership=dealershipUser.dealership.pk).order_by('order_position').all()
+        locations = Location.objects.filter(dealership=dealershipUser.dealership).all()
         context = {
             'customAttributes': customAttributes,
             'dealership_pk': dealershipUser.dealership.pk,
+            'locations': locations
         }
     return render(request, 'pages/settings.html', context)
 
@@ -84,5 +87,20 @@ def save_vehicle_attribute(request):
                 new_position = new_position + 1
 
         return redirect('settings')
+    else:
+        return redirect('settings')
+
+@login_required(login_url='login')
+def add_location(request):
+    if request.method == "POST":
+        form = LocationForm(data=request.POST)
+        if form.is_valid():
+            form.save()
+            print("SAVED")
+            return redirect("settings")
+        else:
+            print("NOT SAVED")
+            print(form.errors)
+            return redirect("settings")
     else:
         return redirect('settings')
