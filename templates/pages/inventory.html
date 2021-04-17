@@ -82,7 +82,7 @@
 
 {% block modals %}
 <div class="modal fade" id="viewVehicleModal" tabindex="-1" role="dialog" aria-labelledby="viewVehicleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="viewVehicleModalLabel">Modal Title</h5><button class="close" type="button" data-dismiss="modal" aria-label="Close"><span class="font-weight-light" aria-hidden="true">&times;</span></button>
@@ -150,16 +150,33 @@
               <div class="col">
                 <h5 class="mb-0">Vehicle Location</h5>
               </div>
+              <div class="col-sm-auto">
+                <button class="btn btn-falcon-default btn-sm" style="display: none;" id="save-location-btn" onclick="updateLocation()"><span class="fas fa-save fs--2 mr-1"></span>Update Location</button>
+              </div>
             </div>
           </div>
           <div class="card-body bg-light border-top">
             <div class="row">
-              
+              <div class="col-sm-6">
+                <p class="font-weight-semi-bold mb-1">Location Name</p>
+              </div>
+              <div class="col-sm-auto">
+                <div class="form-group">
+                  <select class="form-control" id="locationSelect" onchange="showSaveLocationBtn()">
+                    <option value="0">Set a location for this vehicle</option>
+                    {% for location in allLocations %}
+                    <option value="{{location.pk}}">{{location.name}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
             </div>
+            </br>
+            <div id="locationMap" class="shadow rounded" style="height: 300px;"></div>
           </div>
         </div>
       </div>
-      <div class="modal-footer"><button class="btn btn-falcon-default btn-sm ml-2"><span class="fas fa-location-arrow fs--2 mr-1"></span>Update Location</button><button class="btn btn-primary btn-sm" type="button">Modify Entries</button></div>
+      <div class="modal-footer"><button class="btn btn-primary btn-sm" type="button">Modify Entries</button></div>
     </div>
   </div>
 </div>
@@ -167,11 +184,67 @@
 
 {% block javascript %}
 <script>
+    var mymap = L.map('locationMap');
+    var selectedVehicle = "0";
+    var vehicleLocation = "0";
+    var marker;
+    mymap.setView([45.5017, -73.5673], 13);
+    L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=4cf051cf-1bdd-4d05-af8e-41f5006c775a', {
+      maxZoom: 20,
+      attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+    }).addTo(mymap);
+
+    $('#viewVehicleModal').on('shown.bs.modal', function(){
+        mymap.invalidateSize();
+    });
+    
+    function updateLocation() {
+      var locationSelect = document.getElementById("locationSelect")
+      if (locationSelect.value == 0) {
+        alert("You can't unset a location for a vehicle.")
+        document.getElementById("save-location-btn").style = "display:none;";
+        locationSelect.value = vehicleLocation;
+      }
+      else {
+        $.ajax({
+        url: "{% url 'get-location-properties' %}",
+        data: {
+          'location_pk': locationSelect.value,
+          'vehicle_pk': selectedVehicle,
+        },
+        dataType: 'json',
+        success: function(data) {
+          mymap.setView([data['lat'], data['long']], 13);
+          if (marker == null) {
+            marker = L.marker([data['lat'], data['long']])
+            mymap.addLayer(marker);
+          }
+          else {
+            mymap.removeLayer(marker);
+            marker = L.marker([data['lat'], data['long']])
+            mymap.addLayer(marker);
+          }
+          document.getElementById("save-location-btn").style = "display:none;";
+          vehicleLocation = locationSelect.value
+        },
+        error: function(data) {
+            alert("Uh-oh");
+        }
+      });
+      }
+    }
+
+    function showSaveLocationBtn() {
+      var saveBtn = document.getElementById("save-location-btn");
+      saveBtn.style = "display:block;";
+    }
+
     function addNewVehicle() {
         window.location.href = "{% url 'add-vehicle-view' %}";
     }
 
     function loadModalData(vehicle_pk) {
+      selectedVehicle = vehicle_pk;
       $.ajax({
         url: "{% url 'get-vehicle-properties' %}",
         data: {
@@ -182,9 +255,22 @@
           var serialNumber = document.getElementById("serial");
           serialNumber.innerHTML = data['serial'];
           var arrivedOn = document.getElementById("arrived-on");
-          arrivedOn.innerHTML = data['arrived_on']
+          arrivedOn.innerHTML = data['arrived_on'];
           var createdOn = document.getElementById("created-on");
-          createdOn.innerHTML = data['date_added']
+          createdOn.innerHTML = data['date_added'];
+          var location = document.getElementById("locationSelect");
+          location.value = data['location_pk'];
+          vehicleLocation = data['location_pk'];
+          mymap.setView([data['lat'], data['long']], 13);
+          if (marker == null) {
+            marker = L.marker([data['lat'], data['long']])
+            mymap.addLayer(marker);
+          }
+          else {
+            mymap.removeLayer(marker);
+            marker = L.marker([data['lat'], data['long']])
+            mymap.addLayer(marker);
+          }
         },
         error: function(data) {
             alert("Uh-oh");

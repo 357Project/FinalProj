@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Vehicle, VehicleAttribute, CustomVehicleAttribute, CustomVehicleAttributeOptions, StringVehicleAttribute, IntegerVehicleAttribute, CurrencyVehicleAttribute, DateTimeVehicleAttribute, VehicleType
+from .models import Location, VehicleLocation, Vehicle, VehicleAttribute, CustomVehicleAttribute, CustomVehicleAttributeOptions, StringVehicleAttribute, IntegerVehicleAttribute, CurrencyVehicleAttribute, DateTimeVehicleAttribute, VehicleType
 from users.models import Dealership, DealershipUser
 from django.contrib.auth.decorators import login_required
 from django.http.response import JsonResponse
@@ -15,6 +15,7 @@ def view_inventory(request):
     # get custom vehicle attributes
     attributes = CustomVehicleAttribute.objects.filter(dealership=dealership.pk, visible_inventory=True).order_by('order_position').all()
     all_attributes = CustomVehicleAttribute.objects.filter(dealership=dealership.pk).order_by('order_position').all()
+    all_locations = Location.objects.filter(dealership=dealership.pk).all()
     # query vehicles for dealership
     vehicle_list = Vehicle.objects.filter(dealership=dealership.pk).all()
     context = {
@@ -22,7 +23,8 @@ def view_inventory(request):
         'viewInventoryActive': ' active',
         'attributes': attributes,
         'vehicleList': vehicle_list,
-        'allAttributes': all_attributes
+        'allAttributes': all_attributes,
+        'allLocations': all_locations,
     }
     return render(request, 'pages/inventory.html', context)
 
@@ -140,10 +142,44 @@ def get_vehicle_properties(request):
 
     vehicle = Vehicle.objects.get(pk=vehicle_pk)
     date_added = str(vehicle.date_added).split("T")[0].split(" ")[0]
+    location = 0
+    latitude = "45.5017"
+    longitude = "-73.5673"
+    try:
+        location_object = VehicleLocation.objects.get(vehicle=vehicle.pk)
+        location = location_object.location.pk
+        latitude = location_object.location.latitude
+        longitude = location_object.location.longitude
+    except:
+        location = 0
     values = {
         'serial': vehicle.serial,
         'date_added': date_added,
         'arrived_on': vehicle.arrived_on,
+        'location_pk': location,
+        'lat': latitude,
+        'long': longitude
     }
     return JsonResponse(values)
 
+@login_required(login_url='login')
+def get_location_properties(request):
+    location_pk = request.GET.get('location_pk')
+    vehicle_pk = request.GET.get('vehicle_pk')
+
+    location = Location.objects.get(pk=location_pk)
+    vehicle = Vehicle.objects.get(pk=vehicle_pk)
+    try:
+        vehicle_location = VehicleLocation.objects.get(vehicle=vehicle)
+        vehicle_location.location = location
+        vehicle_location.save()
+    except:
+        vehicle_location = VehicleLocation(location=location, vehicle=vehicle)
+        vehicle_location.save()
+    latitude = location.latitude
+    longitude = location.longitude
+    values = {
+        'lat': latitude,
+        'long': longitude
+    }
+    return JsonResponse(values)

@@ -26,7 +26,7 @@ SECRET_KEY = 'y9vk98e)%j*5$5oc3mmdfam4vin$f^8fz%6_$b-q_hxv4xbat4'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'users.AutotracksUser'
 

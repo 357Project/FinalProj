@@ -10,6 +10,8 @@ class Location(models.Model):
     province = models.CharField(null=False, max_length=50)
     postal_code = models.CharField(max_length=7)
     description = models.TextField(null=True, blank=True)
+    longitude = models.CharField(max_length=20)
+    latitude = models.CharField(max_length=20)
 
 class Vehicle(models.Model):
     dealership = models.ForeignKey(Dealership, on_delete=models.PROTECT)

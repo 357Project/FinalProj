@@ -6,6 +6,8 @@ from inventory.models import Vehicle, VehicleAttribute, CustomVehicleAttribute, 
 from users.models import Dealership, DealershipUser
 from .forms import LocationForm
 
+from geopy.geocoders import GoogleV3
+
 # Create your views here.
 @login_required(login_url='login')
 def dashboard_view(request):
@@ -95,7 +97,21 @@ def add_location(request):
     if request.method == "POST":
         form = LocationForm(data=request.POST)
         if form.is_valid():
-            form.save()
+            dealership = form.cleaned_data['dealership']
+            name = form.cleaned_data['name']
+            address = form.cleaned_data['address']
+            city = form.cleaned_data['city']
+            province = form.cleaned_data['province']
+            postal_code = form.cleaned_data['postal_code']
+            description = form.cleaned_data['description']
+
+            locator = GoogleV3(api_key="AIzaSyCSG8w6A9LwKAduiK3LOS3RIFSGPMwuihw")
+            location = locator.geocode(query=f"{address} {city} {province}", exactly_one=True)
+            latitude = location.latitude
+            longitude = location.longitude
+
+            new_location = Location(dealership=dealership, name=name, address=address, city=city, province=province, postal_code=postal_code, description=description, longitude=longitude, latitude=latitude)
+            new_location.save()
             print("SAVED")
             return redirect("settings")
         else:
@@ -104,3 +120,4 @@ def add_location(request):
             return redirect("settings")
     else:
         return redirect('settings')
+
