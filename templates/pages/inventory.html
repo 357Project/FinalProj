@@ -12,7 +12,7 @@
             <div class="input-group input-group-sm">
               <select class="custom-select cus" aria-label="Bulk actions">
                 <option selected="">Bulk actions</option>
-                <option value="Refund">Refund</option>
+                <option value="Refund">Modify Location</option>
                 <option value="Delete">Delete</option>
                 <option value="Archive">Archive</option>
               </select>
@@ -216,14 +216,15 @@
         success: function(data) {
           mymap.setView([data['lat'], data['long']], 13);
           if (marker == null) {
-            marker = L.marker([data['lat'], data['long']])
+            marker = L.marker([data['lat'], data['long']]);
             mymap.addLayer(marker);
           }
           else {
             mymap.removeLayer(marker);
-            marker = L.marker([data['lat'], data['long']])
+            marker = L.marker([data['lat'], data['long']]);
             mymap.addLayer(marker);
           }
+          
           document.getElementById("save-location-btn").style = "display:none;";
           vehicleLocation = locationSelect.value
         },
@@ -262,7 +263,8 @@
           location.value = data['location_pk'];
           vehicleLocation = data['location_pk'];
           mymap.setView([data['lat'], data['long']], 13);
-          if (marker == null) {
+          if (data['location_pk'] != "0") {
+            if (marker == null) {
             marker = L.marker([data['lat'], data['long']])
             mymap.addLayer(marker);
           }
@@ -270,6 +272,7 @@
             mymap.removeLayer(marker);
             marker = L.marker([data['lat'], data['long']])
             mymap.addLayer(marker);
+          }
           }
         },
         error: function(data) {

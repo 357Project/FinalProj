@@ -1,0 +1,232 @@
+{% extends 'index.html' %}
+{% load inventory_tags %}
+{% block content %}
+<form method="POST" action="{% url 'add-vehicle' %}">
+  {% csrf_token %}
+  <div class="card mb-3">
+    <div class="card-header">
+      <div class="row">
+        <div class="col">
+          <h5 class="mb-2">Adding a new vehicle to the dealership inventory</h5>
+          <div class="dropdown-menu"><a class="dropdown-item" href="#">Edit</a><a class="dropdown-item" href="#">Report</a><a class="dropdown-item" href="#">Archive</a>
+            <div class="dropdown-divider"></div><a class="dropdown-item text-danger" href="#">Delete user</a>
+          </div>
+        </div>
+        <div class="col-auto d-none d-sm-block">
+          <h6 class="text-uppercase text-600">Vehicle<span class="fas fa-car ml-2"></span></h6>
+        </div>
+      </div>
+    </div>
+    <div class="card-body border-top">
+      <div class="media">
+        <div class="media-body">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend"><span class="input-group-text" id="basic-addon1">Search</span></div><input class="form-control" id="vehicle-serial" type="text" placeholder="Enter vehicle serial # here..." aria-label="Username" aria-describedby="basic-addon1">
+            </div>
+            <div class="row d-flex justify-content-center">
+                <div class="col-sm-auto">
+                    <button class="btn btn-falcon-default btn-sm ml-2" type="button" onclick="getVehicleData()"><span class="fas fa-search fs--2 mr-1"></span>Search</button>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card mb-3">
+    <div class="card-header">
+      <div class="row align-items-center">
+        <div class="col">
+          <h5 class="mb-0">Default Details</h5>
+        </div>
+      </div>
+    </div>
+    <div class="card-body bg-light border-top">
+      <div class="row">
+        <div class="col-lg col-xxl-5">
+          <div class="row d-flex align-items-center mb-1">
+            <div class="col-5 col-sm-4">
+              <p class="font-weight-semi-bold mb-1">Serial #</p>
+            </div>
+            <div class="col-sm-auto">
+                <input class="form-control" type="text" name="serial-number" id="serial-input">
+            </div>
+          </div>
+          <div class="row d-flex align-items-center mb-1">
+            <div class="col-5 col-sm-4">
+              <p class="font-weight-semi-bold mb-1">Arrived on</p>
+            </div>
+            <div class="col-sm-auto">
+              <input class="form-control datetimepicker" id="arrived-on-input" type="text" placeholder="yyyy-mm-dd" data-options='{"enableTime":false,"dateFormat":"Y-m-d"}' name="arrived-on">
+            </div>
+          </div>
+        </div>
+        <div class="col-lg col-xxl-5 mt-4 mt-lg-0 offset-xxl-1">
+          <div class="row">
+            <div class="col-5 col-sm-4">
+              <p class="font-weight-semi-bold mb-1">Send email to</p>
+            </div>
+            <div class="col"><a href="mailto:tony@gmail.com">tony@gmail.com</a></div>
+          </div>
+          <div class="row">
+            <div class="col-5 col-sm-4">
+              <p class="font-weight-semi-bold mb-1">Address</p>
+            </div>
+            <div class="col">
+              <p class="mb-1">8962 Lafayette St. <br>Oswego, NY 13126</p>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-5 col-sm-4">
+              <p class="font-weight-semi-bold mb-1">Phone number</p>
+            </div>
+            <div class="col"><a href="tel:+12025550110">+1-202-555-0110</a></div>
+          </div>
+          <div class="row">
+            <div class="col-5 col-sm-4">
+              <p class="font-weight-semi-bold mb-0">Invoice prefix</p>
+            </div>
+            <div class="col">
+              <p class="font-weight-semi-bold mb-0">7C23435</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card mb-3">
+    <div class="card-header">
+      <div class="row align-items-center">
+        <div class="col">
+          <h5 class="mb-0">Custom Details</h5>
+        </div>
+      </div>
+    </div>
+    <div class="card-body bg-light border-top">
+      <div class="row">
+        <div class="col-lg col-xxl-5">
+          {% for attribute in attributesLeft %}
+            {% if attribute|is_dropdown:attribute.pk %}
+            <div class="row mb-1 d-flex align-items-center">
+              <div class="col-md-8">
+                <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
+              </div>
+              <div class="col-md-auto">
+                <select class="form-control" style="width: 100%;" name="custom-attribute-{{attribute.pk}}" id="custom-attribute-{{attribute.pk}}">
+                  <option value="None" class="bg-light">Select an option</option>
+                  {% for choice in attribute|get_choices %}
+                  <option value="{{choice.option}}">{{choice.option}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            {% elif attribute|is_integer:attribute.pk %}
+            <div class="row mb-1 d-flex align-items-center">
+              <div class="col-md-8">
+                <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
+              </div>
+              <div class="col-md-auto">
+                <input class="form-control" type="number" name="custom-attribute-{{attribute.pk}}" id="custom-attribute-{{attribute.pk}}">
+              </div> 
+            </div>
+            {% elif attribute|is_date_time:attribute.pk %}
+            <div class="row mb-1 d-flex align-items-center">
+              <div class="col-md-8">
+                <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
+              </div>
+              <div class="col-md-auto">
+                <input class="form-control datetimepicker" id="custom-attribute-{{attribute.pk}}" type="text" placeholder="yyyy-mm-dd h:m" data-options='{"enableTime":true,"dateFormat":"Y-m-d H:i"}' name="custom-attribute-{{attribute.pk}}">
+              </div> 
+            </div>
+            {% else %}
+            <div class="row mb-1 d-flex align-items-center">
+              <div class="col-md-8">
+                <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
+              </div>
+              <div class="col-md-auto">
+                  <input class="form-control" type="text" name="custom-attribute-{{attribute.pk}}" id="custom-attribute-{{attribute.pk}}">
+              </div>
+            </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div class="col-lg col-xxl-5 mt-4 mt-lg-0 offset-xxl-1">
+          {% for attribute in attributesRight %}
+            {% if attribute|is_dropdown:attribute.pk %}
+              <div class="row mb-1 d-flex align-items-center">
+                <div class="col-md-8">
+                  <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
+                </div>
+                <div class="col-md-auto">
+                  <select class="form-control" style="width: 100%;" name="custom-attribute-{{attribute.pk}}" id="custom-attribute-{{attribute.pk}}">
+                    <option value="None" class="bg-light">Select an option</option>
+                    {% for choice in attribute|get_choices %}
+                    <option value="{{choice.option}}">{{choice.option}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            {% elif attribute|is_integer:attribute.pk %}
+            <div class="row mb-1 d-flex align-items-center">
+              <div class="col-md-8">
+                <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
+              </div>
+              <div class="col-md-auto">
+                <input class="form-control" type="number" name="custom-attribute-{{attribute.pk}}" id="custom-attribute-{{attribute.pk}}">
+              </div> 
+            </div>
+            {% elif attribute|is_date_time:attribute.pk %}
+            <div class="row mb-1 d-flex align-items-center">
+              <div class="col-md-8">
+                <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
+              </div>
+              <div class="col-md-auto">
+                <input class="form-control datetimepicker" id="custom-attribute-{{attribute.pk}}" type="text" placeholder="yyyy-mm-dd h:m" data-options='{"enableTime":true,"dateFormat":"Y-m-d H:i"}' name="custom-attribute-{{attribute.pk}}">
+              </div> 
+            </div>
+            {% else %}
+              <div class="row mb-1 d-flex align-items-center">
+                <div class="col-md-8">
+                  <p class="font-weight-semi-bold mb-1">{{attribute.desc}}</p>
+                </div>
+                <div class="col-md-auto">
+                    <input class="form-control" type="text" name="custom-attribute-{{attribute.pk}}" id="custom-attribute-{{attribute.pk}}">
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="card-footer border-top text-right"><button class="btn btn-falcon-default btn-sm ml-2" type="submit"><span class="fas fa-check fs--2 mr-1"></span>Save changes</button></div>
+  </div>
+</form>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    function getVehicleData() {
+        var searchInput = document.getElementById("vehicle-serial");
+        $.ajax({
+        url: "{% url 'search-vehicle-properties' %}",
+        data: {
+          'vehicle_serial': searchInput.value,
+        },
+        dataType: 'json',
+        success: function(data) {
+          var serialInput = document.getElementById("serial-input");
+          serialInput.value = data['serial'];
+          var serialInput = document.getElementById("arrived-on-input");
+          serialInput.value = data['arrived_on'];
+
+          for (attribute in data['custom_attributes']) {
+              var element = document.getElementById("custom-attribute-" + attribute);
+              element.value = data['custom_attributes'][attribute];
+          }
+        },
+        error: function(data) {
+            alert("Uh-oh");
+        }
+      });
+    }
+</script>
+{% endblock %}

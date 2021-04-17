@@ -49,6 +49,26 @@ def add_vehicle_view(request):
     return render(request, 'pages/add-vehicle.html', context)
 
 @login_required(login_url='login')
+def modify_vehicle_view(request):
+    attributes_left = []
+    attributes_right = []
+    # get dealership associated to user
+    dealership = DealershipUser.objects.filter(user=request.user).first().dealership
+    # get custom vehicle attributes
+    attributes = CustomVehicleAttribute.objects.filter(dealership=dealership.pk).order_by('-order_position').all()
+    middle = int(len(attributes) / 2)
+    attributes_right = attributes[:middle]
+    attributes_left = attributes[middle:]
+    context = {
+        'inventoryShow': ' show',
+        'modifyVehicleActive': ' active',
+        'attributesLeft': attributes_left,
+        'attributesRight': attributes_right,
+        'date': date.today(),
+    }
+    return render(request, 'pages/modify-vehicle.html', context)
+
+@login_required(login_url='login')
 def add_vehicle(request):
     serial_number = request.POST.get('serial-number')
     arrived_on = request.POST.get('arrived-on')
@@ -182,4 +202,32 @@ def get_location_properties(request):
         'lat': latitude,
         'long': longitude
     }
+    return JsonResponse(values)
+
+@login_required(login_url='login')
+def search_vehicle_properties(request):
+    vehicle_serial = request.GET.get('vehicle_serial')
+    vehicle = None
+    try:
+        vehicle = Vehicle.objects.get(serial=vehicle_serial)
+    except:
+        return JsonResponse({'result': 'Serial number does not exist.'})
+    
+    attributes = VehicleAttribute.objects.filter(vehicle=vehicle).all()
+    values = {
+        'serial': vehicle.serial,
+        'arrived_on': vehicle.arrived_on,
+        'custom_attributes': {}
+    }
+    for attribute in attributes:
+        vehicle_type = VehicleType.objects.get(vehicle_attribute=attribute)
+        if vehicle_type.custom_attribute.attribute_type == "str" or vehicle_type.custom_attribute.attribute_type == "drop":
+            values['custom_attributes'][attribute.pk] = StringVehicleAttribute.objects.get(vehicle_attribute=attribute).string_value
+        elif vehicle_type.custom_attribute.attribute_type == "int":
+            values['custom_attributes'][attribute.pk] = IntegerVehicleAttribute.objects.get(vehicle_attribute=attribute).integer_value
+        elif vehicle_type.custom_attribute.attribute_type == "cur":
+            values['custom_attributes'][attribute.pk] = CurrencyVehicleAttribute.objects.get(vehicle_attribute=attribute).decimal_value
+        elif vehicle_type.custom_attribute.attribute_type == "date":
+            values['custom_attributes'][attribute.pk] = DateTimeVehicleAttribute.objects.get(vehicle_attribute=attribute).date_time_value
+    
     return JsonResponse(values)
