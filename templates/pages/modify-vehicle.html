@@ -1,8 +1,9 @@
 {% extends 'index.html' %}
 {% load inventory_tags %}
 {% block content %}
-<form method="POST" action="{% url 'add-vehicle' %}">
+<form method="POST" action="{% url 'modify-vehicle' %}">
   {% csrf_token %}
+  <input type="text" name="vehicle-pk" id="vehicle-pk" style="display: none;">
   <div class="card mb-3">
     <div class="card-header">
       <div class="row">
@@ -217,6 +218,8 @@
           serialInput.value = data['serial'];
           var serialInput = document.getElementById("arrived-on-input");
           serialInput.value = data['arrived_on'];
+          var vehiclePk = document.getElementById("vehicle-pk");
+          vehiclePk.value = data['vehicle_pk'];
 
           for (attribute in data['custom_attributes']) {
               var element = document.getElementById("custom-attribute-" + attribute);

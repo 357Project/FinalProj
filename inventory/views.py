@@ -138,6 +138,10 @@ def add_vehicle(request):
     return redirect('view-inventory')
 
 @login_required(login_url='login')
+def modify_vehicle(request):
+
+
+@login_required(login_url='login')
 def get_attribute_values(request):
     vehicle_pk = request.GET.get('vehicle_pk')
 
@@ -148,11 +152,11 @@ def get_attribute_values(request):
         if vehicle_type.custom_attribute.attribute_type == "str" or vehicle_type.custom_attribute.attribute_type == "drop":
             values[vehicle_type.custom_attribute.pk] = StringVehicleAttribute.objects.get(vehicle_attribute=attribute).string_value
         elif vehicle_type.custom_attribute.attribute_type == "int":
-            values[vehicle_type.custom_attribute.pk] = IntegerVehicleAttribute.objects.get(vehicle_attribute=attribute).string_value
+            values[vehicle_type.custom_attribute.pk] = IntegerVehicleAttribute.objects.get(vehicle_attribute=attribute).integer_value
         elif vehicle_type.custom_attribute.attribute_type == "cur":
-            values[vehicle_type.custom_attribute.pk] = CurrencyVehicleAttribute.objects.get(vehicle_attribute=attribute).string_value
+            values[vehicle_type.custom_attribute.pk] = CurrencyVehicleAttribute.objects.get(vehicle_attribute=attribute).decimal_value
         elif vehicle_type.custom_attribute.attribute_type == "date":
-            values[vehicle_type.custom_attribute.pk] = DateTimeVehicleAttribute.objects.get(vehicle_attribute=attribute).string_value
+            values[vehicle_type.custom_attribute.pk] = DateTimeVehicleAttribute.objects.get(vehicle_attribute=attribute).date_time_value
     
     return JsonResponse(values)
 
@@ -217,7 +221,8 @@ def search_vehicle_properties(request):
     values = {
         'serial': vehicle.serial,
         'arrived_on': vehicle.arrived_on,
-        'custom_attributes': {}
+        'custom_attributes': {},
+        'vehicle_pk': vehicle.pk
     }
     for attribute in attributes:
         vehicle_type = VehicleType.objects.get(vehicle_attribute=attribute)
@@ -229,5 +234,4 @@ def search_vehicle_properties(request):
             values['custom_attributes'][attribute.pk] = CurrencyVehicleAttribute.objects.get(vehicle_attribute=attribute).decimal_value
         elif vehicle_type.custom_attribute.attribute_type == "date":
             values['custom_attributes'][attribute.pk] = DateTimeVehicleAttribute.objects.get(vehicle_attribute=attribute).date_time_value
-    
     return JsonResponse(values)
