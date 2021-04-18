@@ -36,7 +36,7 @@ class VehicleAttribute(models.Model):
 
 class VehicleType(models.Model):
     custom_attribute = models.ForeignKey(CustomVehicleAttribute, on_delete=models.CASCADE)
-    vehicle_attribute = models.OneToOneField(VehicleAttribute, on_delete=models.CASCADE)
+    vehicle_attribute = models.OneToOneField(VehicleAttribute, on_delete=models.CASCADE, related_name='vehicle_attribute')
 
 class StringVehicleAttribute(models.Model):
     vehicle_attribute = models.ForeignKey(VehicleAttribute, on_delete=models.CASCADE)

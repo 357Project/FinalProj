@@ -7,6 +7,7 @@ urlpatterns = [
     path('add/', add_vehicle_view, name='add-vehicle-view'),
     path('add-vehicle/', add_vehicle, name='add-vehicle'),
     path('modify/', modify_vehicle_view, name='modify-vehicle-view'),
+    path('modify-vehicle/', modify_vehicle, name='modify-vehicle'),
     path('get-attribute-values/', get_attribute_values, name='get-attribute-values'),
     path('get-vehicle-properties/', get_vehicle_properties, name='get-vehicle-properties'),
     path('search-vehicle-properties/', search_vehicle_properties, name='search-vehicle-properties'),

@@ -72,7 +72,6 @@ def modify_vehicle_view(request):
 def add_vehicle(request):
     serial_number = request.POST.get('serial-number')
     arrived_on = request.POST.get('arrived-on')
-    print(f"========DEBUG: {arrived_on}==========")
     # get dealership associated to user
     dealership = DealershipUser.objects.filter(user=request.user).first().dealership
     # get custom vehicle attributes
@@ -139,7 +138,41 @@ def add_vehicle(request):
 
 @login_required(login_url='login')
 def modify_vehicle(request):
+    serial_number = request.POST.get('serial-number')
+    arrived_on = request.POST.get('arrived-on')
+    vehicle_pk = request.POST.get('vehicle-pk')
 
+    # first save the vehicle with default attributes
+    # date_added will get automatically created, and last modified is left null for now
+    old_vehicle = Vehicle.objects.get(pk=vehicle_pk)
+    old_vehicle.serial = serial_number
+    old_vehicle.arrived_on = arrived_on
+    old_vehicle.save()
+
+    attributes = CustomVehicleAttribute.objects.filter(dealership=old_vehicle.dealership).all()
+    for attribute in attributes:
+        input_field = request.POST.get(f'custom-attribute-{attribute.pk}')
+
+        try:
+            vehicle_attribute = VehicleType.objects.select_related('vehicle_attribute').get(custom_attribute=attribute, vehicle_attribute__vehicle=old_vehicle)
+            if vehicle_attribute.custom_attribute.attribute_type == "str" or vehicle_attribute.custom_attribute.attribute_type == "drop":
+                attribute_value = StringVehicleAttribute.objects.get(vehicle_attribute=vehicle_attribute.vehicle_attribute)
+                attribute_value.string_value = input_field
+                attribute_value.save()
+        except:
+            # vehicle attribute doesn't exist yet, create a new one
+             if attribute.attribute_type == 'str' or attribute.attribute_type == 'drop':
+                # create new vehicle attribute
+                new_attribute = VehicleAttribute(vehicle=old_vehicle)
+                new_attribute.save()
+                # link this attribute to the custom attribute
+                new_vehicle_type = VehicleType(custom_attribute=attribute, vehicle_attribute=new_attribute)
+                new_vehicle_type.save()
+                # add to StringVehicleAttribute
+                new_string_attribute = StringVehicleAttribute(vehicle_attribute=new_attribute, string_value=input_field)
+                new_string_attribute.save()
+    
+    return redirect('modify-vehicle-view')
 
 @login_required(login_url='login')
 def get_attribute_values(request):
@@ -227,11 +260,11 @@ def search_vehicle_properties(request):
     for attribute in attributes:
         vehicle_type = VehicleType.objects.get(vehicle_attribute=attribute)
         if vehicle_type.custom_attribute.attribute_type == "str" or vehicle_type.custom_attribute.attribute_type == "drop":
-            values['custom_attributes'][attribute.pk] = StringVehicleAttribute.objects.get(vehicle_attribute=attribute).string_value
+            values['custom_attributes'][vehicle_type.custom_attribute.pk] = StringVehicleAttribute.objects.get(vehicle_attribute=attribute).string_value
         elif vehicle_type.custom_attribute.attribute_type == "int":
-            values['custom_attributes'][attribute.pk] = IntegerVehicleAttribute.objects.get(vehicle_attribute=attribute).integer_value
+            values['custom_attributes'][vehicle_type.custom_attribute.pk] = IntegerVehicleAttribute.objects.get(vehicle_attribute=attribute).integer_value
         elif vehicle_type.custom_attribute.attribute_type == "cur":
-            values['custom_attributes'][attribute.pk] = CurrencyVehicleAttribute.objects.get(vehicle_attribute=attribute).decimal_value
+            values['custom_attributes'][vehicle_type.custom_attribute.pk] = CurrencyVehicleAttribute.objects.get(vehicle_attribute=attribute).decimal_value
         elif vehicle_type.custom_attribute.attribute_type == "date":
-            values['custom_attributes'][attribute.pk] = DateTimeVehicleAttribute.objects.get(vehicle_attribute=attribute).date_time_value
+            values['custom_attributes'][vehicle_type.custom_attribute.pk] = DateTimeVehicleAttribute.objects.get(vehicle_attribute=attribute).date_time_value
     return JsonResponse(values)
