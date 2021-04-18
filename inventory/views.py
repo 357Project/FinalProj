@@ -268,3 +268,11 @@ def search_vehicle_properties(request):
         elif vehicle_type.custom_attribute.attribute_type == "date":
             values['custom_attributes'][vehicle_type.custom_attribute.pk] = DateTimeVehicleAttribute.objects.get(vehicle_attribute=attribute).date_time_value
     return JsonResponse(values)
+
+@login_required(login_url='login')
+def delete_vehicle(request):
+    vehicles = request.GET.getlist('vehicle_list[]')
+    for vehicle_pk in vehicles:
+        vehicle = Vehicle.objects.get(pk=vehicle_pk)
+        vehicle.delete()
+    return JsonResponse({'results': 'success'})

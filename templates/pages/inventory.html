@@ -10,13 +10,13 @@
         <div class="col-6 col-sm-auto ml-auto text-right pl-0">
           <div class="d-none" id="purchases-actions">
             <div class="input-group input-group-sm">
-              <select class="custom-select cus" aria-label="Bulk actions">
+              <select class="custom-select cus" aria-label="Bulk actions" id="bulk-actions">
                 <option selected="">Bulk actions</option>
                 <option value="Refund">Modify Location</option>
                 <option value="Delete">Delete</option>
                 <option value="Archive">Archive</option>
               </select>
-              <button class="btn btn-falcon-default btn-sm ml-2" type="button">Apply</button>
+              <button class="btn btn-falcon-default btn-sm ml-2" type="button" onclick="applyBulkAction()">Apply</button>
             </div>
           </div>
           <div id="dashboard-actions">
@@ -34,7 +34,7 @@
             <tr>
               <th class="no-sort pr-1 align-middle data-table-row-bulk-select">
                 <div class="custom-control custom-checkbox">
-                  <input class="custom-control-input checkbox-bulk-select" id="checkbox-bulk-purchases-select" type="checkbox" data-checkbox-body="#purchases" data-checkbox-actions="#purchases-actions" data-checkbox-replaced-element="#dashboard-actions" />
+                  <input class="custom-control-input checkbox-bulk-select" id="checkbox-bulk-purchases-select" type="checkbox" data-checkbox-body="#purchases" data-checkbox-actions="#purchases-actions" data-checkbox-replaced-element="#dashboard-actions" onchange="updateAllCheckboxes()"/>
                   <label class="custom-control-label" for="checkbox-bulk-purchases-select"></label>
                 </div>
               </th>
@@ -50,7 +50,7 @@
             <tr>
               <td class="align-middle">
                 <div class="custom-control custom-checkbox">
-                  <input class="custom-control-input checkbox-bulk-select-target" type="checkbox" id="checkbox-vehicle-{{vehicle.pk}}"/>
+                  <input class="custom-control-input checkbox-bulk-select-target" type="checkbox" id="checkbox-vehicle-{{vehicle.pk}}" onchange="updateCheckbox('{{vehicle.pk}}')"/>
                   <label class="custom-control-label" for="checkbox-vehicle-{{vehicle.pk}}"></label>
                 </div>
               </td>
@@ -180,7 +180,21 @@
     </div>
   </div>
 </div>
+<div class="modal fade" id="confirmVehicleDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmVehicleDeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmVehicleDeleteModalLabel">Delete Vehicle(s)</h5><button class="close" type="button" data-dismiss="modal" aria-label="Close"><span class="font-weight-light" aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <p id="deleteVehicleContent"></p>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary btn-sm" type="button" data-dismiss="modal">Cancel</button><button class="btn btn-danger btn-sm" type="button" onclick="deleteVehicles()">Confirm</button></div>
+    </div>
+  </div>
+</div>
 {% endblock %}
+
 
 {% block javascript %}
 <script>
@@ -188,6 +202,8 @@
     var selectedVehicle = "0";
     var vehicleLocation = "0";
     var marker;
+    var checkboxList = []
+
     mymap.setView([45.5017, -73.5673], 13);
     L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=4cf051cf-1bdd-4d05-af8e-41f5006c775a', {
       maxZoom: 20,
@@ -197,6 +213,68 @@
     $('#viewVehicleModal').on('shown.bs.modal', function(){
         mymap.invalidateSize();
     });
+
+    function deleteVehicles() {
+      $.ajax({
+        url: "{% url 'delete-vehicle' %}",
+        data: {
+          'vehicle_list': checkboxList,
+        },
+        dataType: 'json',
+        success: function(data) {
+          location.reload();
+        },
+        error: function(data) {
+            alert("Uh-oh");
+        }
+      });
+    }
+
+    function applyBulkAction() {
+      var action = document.getElementById("bulk-actions");
+      if (action.value == "Delete"){
+        var modalContent = document.getElementById("deleteVehicleContent");
+        modalContent.innerHTML = "You are about to delete <u>" + checkboxList.length + " vehicle(s)</u> from your inventory. Proceed?"
+        $('#confirmVehicleDeleteModal').modal('show');
+      }
+    }
+
+    function addAllCheckboxes() {
+      var vehicleCheckboxes = document.getElementsByClassName("custom-control-input checkbox-bulk-select-target");
+      for (var i = 0; i < vehicleCheckboxes.length; i++) {
+        checkboxList.push(vehicleCheckboxes[i].id.substring(17, vehicleCheckboxes[i].id.length));
+      }
+      console.log(checkboxList);
+    }
+
+    function removeAllCheckboxes() {
+      checkboxList = []
+      console.log(checkboxList)
+    }
+
+    function updateAllCheckboxes() {
+      var element = document.getElementById("checkbox-bulk-purchases-select");
+      if (element.checked) {
+        addAllCheckboxes();
+      }
+      else {
+        removeAllCheckboxes();
+      }
+    }
+
+    function updateCheckbox(vehiclePk) {
+      var checkbox = document.getElementById("checkbox-vehicle-" + vehiclePk);
+      if (checkbox.checked) {
+        checkboxList.push(vehiclePk);
+      }
+      else {
+        var index = checkboxList.indexOf(vehiclePk);
+        if (index > -1) {
+          checkboxList.splice(index, 1);
+        }
+      }
+      console.log(checkboxList);
+    }
     
     function updateLocation() {
       var locationSelect = document.getElementById("locationSelect")
