@@ -7,6 +7,7 @@ from users.models import Dealership, DealershipUser
 from .forms import LocationForm
 
 from geopy.geocoders import GoogleV3
+import os
 
 # Create your views here.
 @login_required(login_url='login')
@@ -105,7 +106,7 @@ def add_location(request):
             postal_code = form.cleaned_data['postal_code']
             description = form.cleaned_data['description']
 
-            locator = GoogleV3(api_key="AIzaSyCSG8w6A9LwKAduiK3LOS3RIFSGPMwuihw")
+            locator = GoogleV3(api_key=os.environ.get('GOOGLE_API'))
             location = locator.geocode(query=f"{address} {city} {province}", exactly_one=True)
             latitude = location.latitude
             longitude = location.longitude
