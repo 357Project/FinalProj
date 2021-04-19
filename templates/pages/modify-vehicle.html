@@ -22,7 +22,7 @@
       <div class="media">
         <div class="media-body">
             <div class="input-group mb-3">
-                <div class="input-group-prepend"><span class="input-group-text" id="basic-addon1">Search</span></div><input class="form-control" id="vehicle-serial" type="text" placeholder="Enter vehicle serial # here..." aria-label="Username" aria-describedby="basic-addon1">
+                <div class="input-group-prepend"><span class="input-group-text" id="basic-addon1">Search</span></div><input class="form-control" id="vehicle-serial" type="text" value="{{serialNumber}}" placeholder="Enter vehicle serial # here..." aria-label="Username" aria-describedby="basic-addon1">
             </div>
             <div class="row d-flex justify-content-center">
                 <div class="col-sm-auto">
@@ -205,6 +205,13 @@
 
 {% block javascript %}
 <script>
+    $( document ).ready(function() {
+        var serialNumber = "{{serialNumber}}"
+        if (serialNumber != "") {
+          getVehicleData();
+        }
+    });
+
     function getVehicleData() {
         var searchInput = document.getElementById("vehicle-serial");
         $.ajax({
@@ -214,16 +221,22 @@
         },
         dataType: 'json',
         success: function(data) {
-          var serialInput = document.getElementById("serial-input");
-          serialInput.value = data['serial'];
-          var serialInput = document.getElementById("arrived-on-input");
-          serialInput.value = data['arrived_on'];
-          var vehiclePk = document.getElementById("vehicle-pk");
-          vehiclePk.value = data['vehicle_pk'];
+          if (!data['result']) {
+            var serialInput = document.getElementById("serial-input");
+            serialInput.value = data['serial'];
+            var serialInput = document.getElementById("arrived-on-input");
+            serialInput.value = data['arrived_on'];
+            var vehiclePk = document.getElementById("vehicle-pk");
+            vehiclePk.value = data['vehicle_pk'];
 
-          for (attribute in data['custom_attributes']) {
-              var element = document.getElementById("custom-attribute-" + attribute);
-              element.value = data['custom_attributes'][attribute];
+            for (attribute in data['custom_attributes']) {
+                var element = document.getElementById("custom-attribute-" + attribute);
+                element.value = data['custom_attributes'][attribute];
+            }
+          }
+          else {
+            alert("Vehicle with serial number entered was not found.");
+            location.reload();
           }
         },
         error: function(data) {

@@ -1,6 +1,7 @@
 {% extends 'index.html' %}
 {% load inventory_tags %}
 {% block content %}
+<div class="alert alert-warning" role="alert">INFO: Filter and export functionalities comming soon.</div>
 <div class="card mb-3">
     <div class="card-header">
       <div class="row align-items-center justify-content-between">
@@ -176,7 +177,7 @@
           </div>
         </div>
       </div>
-      <div class="modal-footer"><button class="btn btn-primary btn-sm" type="button">Modify Entries</button></div>
+      <div class="modal-footer"><button class="btn btn-primary btn-sm" type="button" onclick="modifyVehicle()">Modify Entries</button></div>
     </div>
   </div>
 </div>
@@ -213,6 +214,10 @@
     $('#viewVehicleModal').on('shown.bs.modal', function(){
         mymap.invalidateSize();
     });
+
+    function modifyVehicle() {
+      window.location.href = "../modify/?serialNumber="+document.getElementById("serial").innerHTML;
+    }
 
     function deleteVehicles() {
       $.ajax({

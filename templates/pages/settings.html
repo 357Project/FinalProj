@@ -1,5 +1,6 @@
 {% extends 'index.html' %}
 {% block content %}
+<div class="alert alert-warning" role="alert">INFO: Add and delete vehicle settings and as well as locations.</div>
   <div class="row no-gutters">
     <div class="col-lg-8 pr-lg-2">
       <div class="card mb-3">
@@ -38,7 +39,7 @@
                           <div class="dropdown text-sans-serif d-inline-block mb-2">
                             <button class="btn btn-falcon-default" id="attribute-{{attribute.pk}}-dropdown" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="fas fa-ellipsis-v"></span></button>
                             <div class="dropdown-menu dropdown-menu-right py-0" aria-labelledby="attribute-{{attribute.pk}}-dropdown">
-                              <a class="dropdown-item text-danger" href="#" onclick="deleteAttribute({{attribute.pk}})">Remove</a>
+                              <a class="dropdown-item text-danger" href="#" onclick="deleteAttribute('{{attribute.pk}}')">Remove</a>
                               <a class="dropdown-item" href="#">Change Type</a>
                               <a class="dropdown-item" href="#">Something else here</a>
                             </div>
@@ -145,105 +146,6 @@
             </div>
           </div>
           {% endfor %}
-        </div>
-      </div>
-      <div class="card mb-3 mb-lg-0">
-        <div class="card-header">
-          <h5 class="mb-0">Educations</h5>
-        </div>
-        <div class="card-body bg-light"><a class="mb-4 d-block d-flex align-items-center" href="#education-form" data-toggle="collapse" aria-expanded="false" aria-controls="education-form"><span class="circle-dashed"><span class="fas fa-plus"></span></span><span class="ml-3">Add new education</span></a>
-          <div class="collapse" id="education-form">
-            <form>
-              <div class="form-group">
-                <div class="row">
-                  <div class="col-lg-3 text-lg-right">
-                    <label class="mb-0" for="school">School</label>
-                  </div>
-                  <div class="col-lg-7">
-                    <input class="form-control form-control-sm" id="school" type="text" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
-                <div class="row">
-                  <div class="col-lg-3 text-lg-right">
-                    <label class="mb-0" for="degree">Degree</label>
-                  </div>
-                  <div class="col-lg-7">
-                    <input class="form-control form-control-sm" id="degree" type="text" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
-                <div class="row">
-                  <div class="col-lg-3 text-lg-right">
-                    <label class="mb-0" for="field">Field</label>
-                  </div>
-                  <div class="col-lg-7">
-                    <input class="form-control form-control-sm" id="field" type="text" />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
-                <div class="row">
-                  <div class="col-lg-3 text-lg-right">
-                    <label class="mb-0" for="edu-from">From</label>
-                  </div>
-                  <div class="col-lg-7">
-                    <input class="form-control form-control-sm datetimepicker" id="edu-from" type="text" placeholder="d-m-y" data-options='{"dateFormat":"d-m-Y"}' />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
-                <div class="row">
-                  <div class="col-lg-3 text-lg-right">
-                    <label class="mb-0" for="edu-to">To</label>
-                  </div>
-                  <div class="col-lg-7">
-                    <input class="form-control form-control-sm datetimepicker" id="edu-to" type="text" placeholder="d-m-y" data-options='{"dateFormat":"d-m-Y"}' />
-                  </div>
-                </div>
-              </div>
-              <div class="form-group">
-                <div class="row">
-                  <div class="col-lg-7 offset-lg-3">
-                    <button class="btn btn-primary" type="button">Save</button>
-                  </div>
-                </div>
-              </div>
-            </form>
-            <hr class="border-dashed border-bottom-0 my-4" />
-          </div>
-          <div class="media"><a href="#!">
-              <div class="avatar avatar-3xl">
-                <div class="avatar-name rounded-circle"><span>SU</span></div>
-              </div>
-            </a>
-            <div class="media-body position-relative pl-3">
-              <h6 class="fs-0 mb-0"> <a href="#!">Stanford University<small class="fas fa-check-circle text-primary ml-1" data-toggle="tooltip" data-placement="top" title="Verified" data-fa-transform="shrink-4 down-2"></small></a></h6>
-              <p class="mb-1">Computer Science and Engineering</p>
-              <p class="text-1000 mb-0">2010 - 2014 • 4 yrs</p>
-              <p class="text-1000 mb-0">California, USA</p>
-              <hr class="border-dashed border-bottom-0" />
-            </div>
-          </div>
-          <div class="media"><a href="#!"> <img class="img-fluid" src="../../static/img/logos/staten.png" alt="" width="56" /></a>
-            <div class="media-body position-relative pl-3">
-              <h6 class="fs-0 mb-0"> <a href="#!">Staten Island Technical High School<small class="fas fa-check-circle text-primary ml-1" data-toggle="tooltip" data-placement="top" title="Verified" data-fa-transform="shrink-4 down-2"></small></a></h6>
-              <p class="mb-1">Higher Secondary School Certificate, Science</p>
-              <p class="text-1000 mb-0">2008 - 2010 &bull; 2 yrs</p>
-              <p class="text-1000 mb-0">New York, USA</p>
-              <hr class="border-dashed border-bottom-0" />
-            </div>
-          </div>
-          <div class="media"><a href="#!"> <img class="img-fluid" src="../../static/img/logos/tj-heigh-school.png" alt="" width="56" /></a>
-            <div class="media-body position-relative pl-3">
-              <h6 class="fs-0 mb-0"> <a href="#!">Thomas Jefferson High School for Science and Technology<small class="fas fa-check-circle text-primary ml-1" data-toggle="tooltip" data-placement="top" title="Verified" data-fa-transform="shrink-4 down-2"></small></a></h6>
-              <p class="mb-1">Secondary School Certificate, Science</p>
-              <p class="text-1000 mb-0">2003 - 2008 &bull; 5 yrs</p>
-              <p class="text-1000 mb-0">Alexandria, USA</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>

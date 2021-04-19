@@ -50,6 +50,9 @@ def add_vehicle_view(request):
 
 @login_required(login_url='login')
 def modify_vehicle_view(request):
+    serial_number = ""
+    if request.GET.get('serialNumber'):
+        serial_number = request.GET.get('serialNumber')
     attributes_left = []
     attributes_right = []
     # get dealership associated to user
@@ -65,6 +68,7 @@ def modify_vehicle_view(request):
         'attributesLeft': attributes_left,
         'attributesRight': attributes_right,
         'date': date.today(),
+        'serialNumber': serial_number
     }
     return render(request, 'pages/modify-vehicle.html', context)
 
