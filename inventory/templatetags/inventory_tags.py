@@ -49,7 +49,11 @@ def return_attribute_value(attribute, attribute_pk):
         return null
 
 def attribute_list(vehicle, vehicle_pk):
-    return VehicleAttribute.objects.filter(vehicle=vehicle_pk).all()
+    vehicle_attributes = VehicleType.objects.select_related('vehicle_attribute', 'custom_attribute').filter(vehicle_attribute__vehicle=vehicle).order_by('custom_attribute__order_position')
+    attributes = []
+    for vehicle in vehicle_attributes:
+        attributes.append(vehicle.vehicle_attribute)
+    return attributes
 
 
 register.filter('get_choices', get_attribute_choices)

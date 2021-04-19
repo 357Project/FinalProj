@@ -3,6 +3,7 @@ from .models import Location, VehicleLocation, Vehicle, VehicleAttribute, Custom
 from users.models import Dealership, DealershipUser
 from django.contrib.auth.decorators import login_required
 from django.http.response import JsonResponse
+from django.contrib import messages
 
 from datetime import date
 from decimal import Decimal
@@ -84,7 +85,11 @@ def add_vehicle(request):
     # first create the vehicle with default attributes
     # date_added will get automatically created, and last modified is left null for now
     new_vehicle = Vehicle(dealership=dealership, serial=serial_number, arrived_on=arrived_on)
-    new_vehicle.save()
+    try:
+        new_vehicle.save()
+    except:
+        messages.error(request, "Vehicle with this serial number already exists.")
+        return redirect('add-vehicle-view')
 
     # (OPTIONAL: loop through the fields in the frontend to make sure the data is present before posting the request)
 

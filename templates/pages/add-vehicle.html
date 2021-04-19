@@ -1,6 +1,11 @@
 {% extends 'index.html' %}
 {% load inventory_tags %}
 {% block content %}
+{% if messages %}
+  {% for message in messages %}
+  <div class="alert alert-danger" role="alert">{{message}}</div>
+  {% endfor %}
+{% endif %}
 <form method="POST" action="{% url 'add-vehicle' %}">
   {% csrf_token %}
   <div class="card mb-3">
